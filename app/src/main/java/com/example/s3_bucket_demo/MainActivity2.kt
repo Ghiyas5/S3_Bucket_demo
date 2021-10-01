@@ -44,7 +44,7 @@ class MainActivity2 : AppCompatActivity() {
 
 
         Thread {
-            createTransferUtility()
+            //createTransferUtility()
             runOnUiThread {
                 // Post the result to the main thread
             }
@@ -53,19 +53,19 @@ class MainActivity2 : AppCompatActivity() {
         getCurrentDate()
     }
 
-    private fun createTransferUtility() {
-        val credentialsProvider = CognitoCachingCredentialsProvider(
-            getApplicationContext(),
-            COGNITO_POOL_ID,
-            Regions.US_EAST_1
-        )
-        val s3Client = AmazonS3Client(credentialsProvider)
-        transferUtility = TransferUtility(s3Client, this.getApplicationContext())
-        val objectListing: ObjectListing = s3Client.listObjects(ListObjectsRequest().withBucketName(BUCKET_NAME).withPrefix("radar/klix/lixtileskml/"))
-        for (objectSummary: S3ObjectSummary in objectListing.objectSummaries) {
-            println(" - " + objectSummary.key + "  " + "(size = " + objectSummary.size + ")")
-        }
-    }
+//    private fun createTransferUtility() {
+//        val credentialsProvider = CognitoCachingCredentialsProvider(
+//            getApplicationContext(),
+//            COGNITO_POOL_ID,
+//            Regions.US_EAST_1
+//        )
+//        val s3Client = AmazonS3Client(credentialsProvider)
+//        transferUtility = TransferUtility(s3Client, this.getApplicationContext())
+//        val objectListing: ObjectListing = s3Client.listObjects(ListObjectsRequest().withBucketName(BUCKET_NAME).withPrefix("radar/klix/lixtileskml/"))
+//        for (objectSummary: S3ObjectSummary in objectListing.objectSummaries) {
+//            println(" - " + objectSummary.key + "  " + "(size = " + objectSummary.size + ")")
+//        }
+//    }
     fun getCurrentDate(){
         val textView :TextView = findViewById(R.id.abcText)
         var currentcalendar = Calendar.getInstance()
