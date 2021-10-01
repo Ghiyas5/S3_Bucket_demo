@@ -47,6 +47,11 @@ import android.R.attr.stepSize
 import android.os.CountDownTimer
 import android.widget.*
 import androidx.core.graphics.drawable.toDrawable
+import com.example.s3_bucket_demo.grib_file.Grib2Dumper
+import com.example.s3_bucket_demo.grib_file.Utils
+
+
+import java.io.File
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -73,10 +78,18 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        Thread {
+            getgrabFile()
+            runOnUiThread {
+                // Post the result to the main thread
+            }
+        }.start()
+
 //        createTransferUtility()
          textView   = findViewById(R.id.text);
          btn   = findViewById(R.id.btn);
-
+        getCurrentDate()
         bubbleSeekBar4  = findViewById(R.id.aw)
 
         bubbleSeekBar4!!.getConfigBuilder()
@@ -158,10 +171,11 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+
     }
 
     fun getCurrentDate(){
-        val textView :TextView = findViewById(R.id.abcText)
+       // val textView :TextView = findViewById(R.id.abcText)
         var currentcalendar = Calendar.getInstance()
         var minuscalendar = Calendar.getInstance()
         var pluscalendar = Calendar.getInstance()
@@ -169,20 +183,40 @@ class MainActivity : AppCompatActivity() {
         // var currentTime = format.format(currentcalendar.getTime())
         //currentlist.add(format.format(currentcalendar.getTime()))
         currentTime=format.format(currentcalendar.time)
+
+        //  static datetime
+        val date =  "2021-09-12-1523"
+         var  mDate :  Date = format.parse(date)
+        var  timeInMilliseconds = mDate.getTime();
+        var second = timeInMilliseconds/1000
+        var   minsecond = second
+        var   plussecond = second
         var x = 1
         while (x<=12){
-            minuscalendar.add(Calendar.SECOND, -300);
-            minuslist.add(format.format(minuscalendar.getTime()))
-            pluscalendar.add(Calendar.SECOND, 300);
-            pluslist.add(format.format(pluscalendar.getTime()))
+            // w.r.t static time
+                minsecond = minsecond-300
+            val minusdate: String = format.format(Date(minsecond * 1000L))
+            minuslist.add(minusdate)
+            plussecond = plussecond+300
+            val plusdate: String = format.format(Date(plussecond * 1000L))
+            pluslist.add(plusdate)
+
+            // w.r.t current time
+//            minuscalendar.add(Calendar.SECOND, -300);
+//            minuslist.add(format.format(minuscalendar.getTime()))
+//            pluscalendar.add(Calendar.SECOND, 300);
+//            pluslist.add(format.format(pluscalendar.getTime()))
             x++
         }
 
-        list.addAll(minuslist)
-        list.add(currentTime)
-        list.addAll(pluslist)
-        //  list = (minuslist+currentlist+pluslist) as ArrayList<String>
+        minuslist.asReversed().forEach { list.add(it) }
 
+
+        list.add(date)
+        list.addAll(pluslist)
+
+        //  list.addAll(minuslist)
+        //  list = (minuslist+currentlist+pluslist) as ArrayList<String>
 //        list.add(minuslist.toString())
 //        list.add(currentlist.toString())
 //        list.add(pluslist.toString())
@@ -191,8 +225,15 @@ class MainActivity : AppCompatActivity() {
         for(a in list) {
             b = a+","+b
         }
+        textView.setText(b)
 
-
+    }
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getgrabFile(){
+        val gribfile: File? =
+            Utils.downloadFileIfNecessary("https://aerocast.s3.amazonaws.com/models/hrrrlatest/hrrr.18z.fcsthr.03z-2021-08-22-20-57.grb")
+        val grib2Dumper = Grib2Dumper(gribfile)
+        grib2Dumper.dump(System.out, false)
     }
 
 
